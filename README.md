@@ -4,7 +4,7 @@ Prism is a Python desktop media hub for music and audio, movies and TV, and arca
 
 ## Current status
 
-- Music and audio: the current working module, with Supabase-backed songs, playlists, and liked songs.
+- Music and audio: Jamendo search and streaming, recursive playback from a selected local folder, and the existing Supabase library available as a separate legacy source.
 - Movies and TV: TMDB title catalogue and embedded local video playback.
 - Arcade: Snake is playable inside Prism; more games can be added later.
 
@@ -14,7 +14,7 @@ The Snake game adapts PyBox gameplay under its MIT license. See [THIRD_PARTY_NOT
 
 - Windows (the current app has been developed and run on Windows)
 - Python 3.15, matching the project handoff
-- A Supabase project configured for the tables and authentication used by the app
+- A Supabase project configured for authentication and the playlist migration below
 
 ## Set up on Windows
 
@@ -41,7 +41,11 @@ The Snake game adapts PyBox gameplay under its MIT license. See [THIRD_PARTY_NOT
 
    Edit `.env` and set `SUPABASE_URL` and `SUPABASE_KEY` to the project's Supabase URL and publishable key. Never put a Supabase `service_role` key in this desktop client or commit `.env`.
 
+   In the Supabase SQL Editor, run [`supabase/migrations/202606080001_music_playlists.sql`](./supabase/migrations/202606080001_music_playlists.sql) once. It creates account-owned playlists and Jamendo playlist entries protected by row-level security. If an existing `public.playlists` table uses non-UUID `id` or `user_id` columns, the migration stops with an explicit error; do not drop that table, since it may contain data. Local file entries are stored only on this computer under `%LOCALAPPDATA%\Prism\playlist_items.sqlite3`; their paths are not uploaded.
+
    To enable the Movies & TV catalog, set `TMDB_API_KEY` in the same local `.env` file using your own TMDB API key. Keep it out of Git as well.
+
+   Music & Audio uses the public Jamendo Client ID in `.env.example` by default. It can be overridden with `JAMENDO_CLIENT_ID`. Do not add a Jamendo client secret to this desktop app.
 
 5. Launch Prism:
 
@@ -56,6 +60,10 @@ The Snake game adapts PyBox gameplay under its MIT license. See [THIRD_PARTY_NOT
 - Do not commit `.env`, SQLite databases, real user data, or credentials.
 - The Movies & TV catalog uses TMDB metadata. This app is not endorsed or certified by TMDB; see the in-app Credits for attribution.
 - Snake uses arrow keys or W/A/S/D to steer, Space or Escape to pause, a Play overlay to start or replay, and icon controls above the board to pause or restart.
+- Jamendo catalog search and genre browsing use its public API. Select a Jamendo result and double-click to play it; track pages and license links are shown in Prism. Downloads are not offered.
+- Select **Local files** in Music & Audio and choose a folder to scan recursively. Supported extensions are MP3, OGG, OGA, WAV, and FLAC.
+- The player queue follows the active results or playlist when a track is started. Use the queue panel to play, remove, or clear upcoming tracks; shuffle and repeat-off/all/one controls are available in the player bar. Timeline seeking depends on the active format supporting seeking.
+- Create playlists from the sidebar, open one by double-clicking it, and rename or delete it from its context menu. Add Jamendo or local tracks from the music table context menu. Jamendo entries sync to the signed-in Supabase account; local entries remain device-only.
 
 ## Working with branches
 

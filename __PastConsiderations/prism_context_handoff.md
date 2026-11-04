@@ -9,7 +9,7 @@
 
 The project satisfies requirement **Option 3A: Media and Entertainment**, covering three unified media components inside a single desktop application without external application redirects:
 
-1. 🎵 **3A.2 Music & Audio:** Audio streaming engine powered by `pygame-ce` connected to a Supabase database. *(Status: Core complete)*
+1. 🎵 **3A.2 Music & Audio:** Jamendo catalog search and streaming, recursive playback from a selected local folder, and the existing Supabase library retained as a separate source. Playback uses `pygame-ce`. *(Status: Jamendo search, genre browsing, local-file playback, queue, shuffle/repeat, timeline, and account-linked playlists implemented.)*
 2. 🎬 **3A.1 Movies & TV Shows:** TMDB-backed title catalogue plus local embedded video playback powered by PyQt6 (`QMediaPlayer` & `QVideoWidget`). *(Status: Catalogue UI and local playback implemented; test with the configured API key and a local video file.)*
 3. 🎮 **3A.3 Games & Arcade:** Interactive mini-games integrated natively inside a PyQt layout frame. *(Status: Snake playable in the Arcade view, adapted from PyBox under MIT; more games planned.)*
 
@@ -24,9 +24,10 @@ The project satisfies requirement **Option 3A: Media and Entertainment**, coveri
   * **Identity and sessions:** Supabase Auth remains the identity provider so music, playlists, and likes keep using the matching Supabase user ID and session.
   * **Local account data:** SQLite stores the email and password hash, salt, and KDF iteration count in the user's local application data folder. Existing Supabase accounts are added to SQLite after their first successful sign-in.
   * **Password security:** Use a salted password KDF available in Python's built-in `hashlib` (such as `pbkdf2_hmac`) to hash and verify passwords. Never store plaintext passwords or unsalted fast hashes.
-  * **Supabase Database (PostgreSQL):** `songs`, `playlists`, and `liked_songs` tables.
+  * **Supabase Database (PostgreSQL):** `songs`, `playlists`, `playlist_tracks`, and `liked_songs` tables. Playlist tables are provisioned by `supabase/migrations/202606080001_music_playlists.sql` with account-scoped row-level security.
   * **Supabase Storage:** Direct HTTPS raw audio streaming.
 * **Movie catalogue:** TMDB movie and TV search API. Store `TMDB_API_KEY` in local `.env`, never in source control. Show the approved TMDB logo and the required non-endorsement notice in Credits.
+* **Music catalogue:** Jamendo v3 public API using `JAMENDO_CLIENT_ID` only. Never include a Jamendo client secret in the desktop app. Show track pages and license links for catalog results.
 
 ---
 
@@ -51,7 +52,7 @@ Finals Project (SpotifyClone)/
 ├── supabase_client.py    # Initializes global Supabase client instance
 ├── auth.py               # Handles user authentication (login_user, register_user)
 ├── db.py                 # Handles table queries (fetch_all_songs, fetch_user_playlists, etc.)
-├── player.py             # Audio playback logic using pygame.mixer.music
+├── player.py             # Audio playback logic for remote bytes and local files using pygame.mixer.music
 ├── main.py               # Main application entry point & window router
 │
 └── ui/
@@ -79,7 +80,15 @@ Functions available:
 ### `player.py`
 Contains `AudioPlayer` class:
 - `play_url(audio_url, song_data)`: Streams raw audio bytes over HTTPS using `urllib.request` and `pygame.mixer.music`.
-- `pause()`, `resume()`, `stop()`, `set_volume(value)`.
+- `play_bytes(audio_bytes, song_data)`: Plays remote audio loaded by the background download worker.
+- `play_file(file_path, song_data)`: Plays a local file directly.
+- `pause()`, `resume()`, `stop()`, `set_volume(value)`, `position_seconds()`, and `seek(position_seconds)`.
+
+### `ui/music_queue.py` and playlist persistence
+- `PlaybackQueue` handles sequential playback, shuffle without repeats within a cycle, previous-track history, and repeat off/all/one.
+- Jamendo playlist entries are synced through Supabase `playlists` and `playlist_tracks`, protected by per-user row-level security.
+- Local-file playlist entries are stored in `%LOCALAPPDATA%\\Prism\\playlist_items.sqlite3` and never upload local paths.
+- `mutagen` supplies duration metadata for local-file timelines.
 
 ---
 
@@ -105,6 +114,14 @@ When continuing development in VS Code, follow this implementation order:
 4. **Expand the In-App Game Module (`ui/arcade_view.py`):**
    - Add more embedded games to the Arcade picker after Snake.
    - Keep each game integrated in the PyQt layout and preserve required third-party notices.
+
+5. **Music & Audio source status:**
+   - The Music & Audio page defaults to Jamendo, with title/artist search and genre browsing.
+   - Artist results are fetched through Jamendo's artists/tracks endpoint.
+   - Local files are scanned recursively from a user-selected folder; MP3, OGG, OGA, WAV, and FLAC are supported.
+   - Supabase music and playlist operations remain as a separate legacy source.
+   - Playback queue controls provide next/previous, shuffle, repeat off/all/one, a seek timeline, and a queue editor.
+   - Account playlists can be created, opened, renamed, deleted, and edited by adding/removing Jamendo or device-only local tracks. Apply the Supabase playlist migration from the README before using cloud playlist operations.
 
 ---
 *Created for VS Code AI Extension context loading (Continue / Cline / Copilot).*
