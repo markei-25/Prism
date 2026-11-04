@@ -10,7 +10,7 @@
 The project satisfies requirement **Option 3A: Media and Entertainment**, covering three unified media components inside a single desktop application without external application redirects:
 
 1. 🎵 **3A.2 Music & Audio:** Audio streaming engine powered by `pygame-ce` connected to a Supabase database. *(Status: Core complete)*
-2. 🎬 **3A.1 Movies & TV Shows:** Embedded video player powered by PyQt6 (`QMediaPlayer` & `QVideoWidget`). *(Status: Next implementation step)*
+2. 🎬 **3A.1 Movies & TV Shows:** TMDB-backed title catalogue plus local embedded video playback powered by PyQt6 (`QMediaPlayer` & `QVideoWidget`). *(Status: Catalogue UI and local playback implemented; test with the configured API key and a local video file.)*
 3. 🎮 **3A.3 Games & Arcade:** Interactive mini-game integrated natively inside a PyQt layout frame. *(Status: Planned)*
 
 ---
@@ -26,6 +26,7 @@ The project satisfies requirement **Option 3A: Media and Entertainment**, coveri
   * **Password security:** Use a salted password KDF available in Python's built-in `hashlib` (such as `pbkdf2_hmac`) to hash and verify passwords. Never store plaintext passwords or unsalted fast hashes.
   * **Supabase Database (PostgreSQL):** `songs`, `playlists`, and `liked_songs` tables.
   * **Supabase Storage:** Direct HTTPS raw audio streaming.
+* **Movie catalogue:** TMDB movie and TV search API. Store `TMDB_API_KEY` in local `.env`, never in source control. Show the approved TMDB logo and the required non-endorsement notice in Credits.
 
 ---
 
@@ -98,6 +99,7 @@ When continuing development in VS Code, follow this implementation order:
 3. **Build Video Player (`ui/video_view.py`):**
    - Implement `QMediaPlayer` and `QVideoWidget` from `PyQt6.QtMultimedia` & `PyQt6.QtMultimediaWidgets`.
    - Add playback controls (play/pause, timeline slider, volume).
+   - Current first pass: `ui/view_view.py` hosts a TMDB movie/TV catalogue and a local video player. Internet playback remains a separate future feature.
 
 4. **Build In-App Game Module (`ui/game_view.py`):**
    - Implement an in-app interactive mini-game tab (e.g., Music Trivia or Rhythm mini-game).

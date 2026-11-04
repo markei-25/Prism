@@ -22,6 +22,7 @@ from PyQt6.QtWidgets import (
 from player import AudioPlayer
 from ui.player_bar import PlayerBar
 from ui.sidebar import Sidebar
+from ui.view_view import ViewView
 import db
 
 
@@ -193,13 +194,7 @@ class MainWindow(QMainWindow):
         self.pages = QStackedWidget()
         self.pages.addWidget(self._build_home_page())
         self.pages.addWidget(self._build_music_page())
-        self.pages.addWidget(
-            self._build_placeholder_page(
-                "Movies & TV",
-                "Coming soon",
-                "The next media module is an in-app viewing experience for films and series.",
-            )
-        )
+        self.pages.addWidget(ViewView())
         self.pages.addWidget(
             self._build_placeholder_page(
                 "Arcade",

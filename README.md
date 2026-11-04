@@ -41,6 +41,8 @@ The movies and arcade dashboard entries are labeled as future work; they are not
 
    Edit `.env` and set `SUPABASE_URL` and `SUPABASE_KEY` to the project's Supabase URL and publishable key. Never put a Supabase `service_role` key in this desktop client or commit `.env`.
 
+   To enable the Movies & TV catalog, set `TMDB_API_KEY` in the same local `.env` file using your own TMDB API key. Keep it out of Git as well.
+
 5. Launch Prism:
 
    ```powershell
@@ -52,6 +54,7 @@ The movies and arcade dashboard entries are labeled as future work; they are not
 - `.env` contains local Supabase settings and is excluded from Git.
 - Supabase Auth provides account identity and sessions. SQLite stores a salted PBKDF2 password hash and its metadata locally; the database is created under `%LOCALAPPDATA%\Prism\users.sqlite3`.
 - Do not commit `.env`, SQLite databases, real user data, or credentials.
+- The Movies & TV catalog uses TMDB metadata. This app is not endorsed or certified by TMDB; see the in-app Credits for attribution.
 
 ## Working with branches
 
