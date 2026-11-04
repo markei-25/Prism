@@ -20,6 +20,7 @@ from PyQt6.QtWidgets import (
 )
 
 from player import AudioPlayer
+from ui.arcade_view import ArcadeView
 from ui.player_bar import PlayerBar
 from ui.sidebar import Sidebar
 from ui.view_view import ViewView
@@ -95,7 +96,7 @@ class MainWindow(QMainWindow):
                 font-size: 13px;
             }
             QPushButton#route_music,
-            QPushButton#route_future {
+            QPushButton#route_media {
                 background-color: #1A1A24;
                 border: 1px solid #343440;
                 border-left: 3px solid #454554;
@@ -111,18 +112,18 @@ class MainWindow(QMainWindow):
                 min-height: 84px;
                 font-size: 16px;
             }
-            QPushButton#route_future {
+            QPushButton#route_media {
                 min-height: 56px;
                 color: #E5E5EC;
                 font-size: 14px;
             }
             QPushButton#route_music:hover,
-            QPushButton#route_future:hover {
+            QPushButton#route_media:hover {
                 background-color: #22222C;
                 border-color: #00D2FF;
             }
             QPushButton#route_music:focus,
-            QPushButton#route_future:focus,
+            QPushButton#route_media:focus,
             QPushButton#home_button:focus,
             QPushButton#retry_button:focus {
                 border: 2px solid #FFFFFF;
@@ -195,13 +196,8 @@ class MainWindow(QMainWindow):
         self.pages.addWidget(self._build_home_page())
         self.pages.addWidget(self._build_music_page())
         self.pages.addWidget(ViewView())
-        self.pages.addWidget(
-            self._build_placeholder_page(
-                "Arcade",
-                "Planned",
-                "Prism's arcade space is planned as an in-app mini-game module.",
-            )
-        )
+        self.arcade_view = ArcadeView()
+        self.pages.addWidget(self.arcade_view)
         body.addWidget(self.pages, stretch=1)
         root_layout.addLayout(body, stretch=1)
 
@@ -229,7 +225,7 @@ class MainWindow(QMainWindow):
         layout.addWidget(title)
 
         description = QLabel(
-            "Music is available now. Movies & TV are next, with Arcade planned."
+            "Browse music, search movies and TV, or play Snake."
         )
         description.setObjectName("body_copy")
         layout.addWidget(description)
@@ -241,15 +237,15 @@ class MainWindow(QMainWindow):
         music_button.clicked.connect(lambda: self.handle_navigation("music"))
         layout.addWidget(music_button)
 
-        movies_button = QPushButton("Movies & TV\nComing soon")
-        movies_button.setObjectName("route_future")
-        movies_button.setAccessibleName("Open Movies and TV, coming soon")
+        movies_button = QPushButton("Movies & TV\nSearch titles or play a local video")
+        movies_button.setObjectName("route_media")
+        movies_button.setAccessibleName("Open Movies and TV")
         movies_button.clicked.connect(lambda: self.handle_navigation("movies"))
         layout.addWidget(movies_button)
 
-        arcade_button = QPushButton("Arcade\nPlanned for a later step")
-        arcade_button.setObjectName("route_future")
-        arcade_button.setAccessibleName("Open Arcade, planned")
+        arcade_button = QPushButton("Arcade\nPlay Snake inside Prism")
+        arcade_button.setObjectName("route_media")
+        arcade_button.setAccessibleName("Open Arcade and play Snake")
         arcade_button.clicked.connect(lambda: self.handle_navigation("arcade"))
         layout.addWidget(arcade_button)
 
@@ -517,6 +513,8 @@ class MainWindow(QMainWindow):
             return
 
         self._show_page(page_index)
+        if target != "arcade":
+            self.arcade_view.pause_game()
         if target == "music":
             self.load_music()
         elif target == "liked":

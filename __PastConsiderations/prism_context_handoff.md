@@ -11,7 +11,7 @@ The project satisfies requirement **Option 3A: Media and Entertainment**, coveri
 
 1. 🎵 **3A.2 Music & Audio:** Audio streaming engine powered by `pygame-ce` connected to a Supabase database. *(Status: Core complete)*
 2. 🎬 **3A.1 Movies & TV Shows:** TMDB-backed title catalogue plus local embedded video playback powered by PyQt6 (`QMediaPlayer` & `QVideoWidget`). *(Status: Catalogue UI and local playback implemented; test with the configured API key and a local video file.)*
-3. 🎮 **3A.3 Games & Arcade:** Interactive mini-game integrated natively inside a PyQt layout frame. *(Status: Planned)*
+3. 🎮 **3A.3 Games & Arcade:** Interactive mini-games integrated natively inside a PyQt layout frame. *(Status: Snake playable in the Arcade view, adapted from PyBox under MIT; more games planned.)*
 
 ---
 
@@ -38,6 +38,7 @@ The project satisfies requirement **Option 3A: Media and Entertainment**, coveri
 * **Borders & Dividers:** Subtle Slate (`#2E2E3E`)
 * **Text Colors:** White (`#FFFFFF`) for titles, Muted Slate (`#7A7A95`) as the palette reference. Use a contrast-adjusted slate (`#B7B7C7`) for small labels on dark surfaces.
 * **Interface direction:** Keep the deep background as the media canvas; use a narrow cyan edge to mark the active destination and the currently available music route. The music destination gets more visual weight because it is usable now; future media destinations stay restrained until implemented. Use Segoe UI for native desktop legibility, with Qt's system fallback on other platforms. A short fade on page changes softens navigation without competing with media content. The first login/dashboard pass uses ENERGY 2 / RHYTHM 2 / MOTION 1.
+* **Arcade design read:** ENERGY 2 / RHYTHM 2 / MOTION 1. The Snake grid communicates its discrete movement rules, while the cyan head and active navigation edge connect gameplay to Prism's existing identity. Compact uppercase labels separate game selection, score, and controls for quick scanning. Play and replay appear over the board only when needed; pause and restart use compact, accessible icon controls in the board toolbar.
 
 ---
 
@@ -101,8 +102,9 @@ When continuing development in VS Code, follow this implementation order:
    - Add playback controls (play/pause, timeline slider, volume).
    - Current first pass: `ui/view_view.py` hosts a TMDB movie/TV catalogue and a local video player. Internet playback remains a separate future feature.
 
-4. **Build In-App Game Module (`ui/game_view.py`):**
-   - Implement an in-app interactive mini-game tab (e.g., Music Trivia or Rhythm mini-game).
+4. **Expand the In-App Game Module (`ui/arcade_view.py`):**
+   - Add more embedded games to the Arcade picker after Snake.
+   - Keep each game integrated in the PyQt layout and preserve required third-party notices.
 
 ---
 *Created for VS Code AI Extension context loading (Continue / Cline / Copilot).*
