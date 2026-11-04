@@ -2,3 +2,4 @@ PyQt6==6.11.0
 pygame-ce==2.5.8
 python-dotenv>=1.0,<2.0
 supabase==2.33.0
+mutagen>=1.47,<2.0

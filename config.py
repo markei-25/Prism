@@ -11,6 +11,7 @@ load_dotenv(Path(__file__).with_name(".env"))
 SUPABASE_URL = os.getenv("SUPABASE_URL", "").strip()
 SUPABASE_KEY = os.getenv("SUPABASE_KEY", "").strip()
 TMDB_API_KEY = os.getenv("TMDB_API_KEY", "").strip()
+JAMENDO_CLIENT_ID = os.getenv("JAMENDO_CLIENT_ID", "e6c53c81").strip()
 
 missing_settings = [
     name
