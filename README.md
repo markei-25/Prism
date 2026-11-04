@@ -5,10 +5,10 @@ Prism is a Python desktop media hub for music and audio, movies and TV, and arca
 ## Current status
 
 - Music and audio: the current working module, with Supabase-backed songs, playlists, and liked songs.
-- Movies and TV: planned next, with an embedded PyQt6 video player.
-- Arcade: planned as an in-app game module.
+- Movies and TV: TMDB title catalogue and embedded local video playback.
+- Arcade: Snake is playable inside Prism; more games can be added later.
 
-The movies and arcade dashboard entries are labeled as future work; they are not implemented yet.
+The Snake game adapts PyBox gameplay under its MIT license. See [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md) for attribution and license terms.
 
 ## Requirements
 
@@ -55,6 +55,7 @@ The movies and arcade dashboard entries are labeled as future work; they are not
 - Supabase Auth provides account identity and sessions. SQLite stores a salted PBKDF2 password hash and its metadata locally; the database is created under `%LOCALAPPDATA%\Prism\users.sqlite3`.
 - Do not commit `.env`, SQLite databases, real user data, or credentials.
 - The Movies & TV catalog uses TMDB metadata. This app is not endorsed or certified by TMDB; see the in-app Credits for attribution.
+- Snake uses arrow keys or W/A/S/D to steer, Space or Escape to pause, a Play overlay to start or replay, and icon controls above the board to pause or restart.
 
 ## Working with branches
 
