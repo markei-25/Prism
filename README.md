@@ -53,6 +53,27 @@ The Snake game adapts PyBox gameplay under its MIT license. See [THIRD_PARTY_NOT
    python main.py
    ```
 
+## Build a portable Windows presentation copy
+
+Build on a Windows computer using the same architecture as the presentation computer. This creates a folder-based app and a ZIP; the lab computer does not need Python, PyCharm, or a project checkout.
+
+1. Install the project requirements in its virtual environment, then install the build tool:
+
+   ```powershell
+   python -m pip install -r requirements.txt
+   python -m pip install -r requirements-build.txt
+   ```
+
+2. From the project folder, run:
+
+   ```powershell
+   .\build_windows.ps1
+   ```
+
+3. Copy `dist\Prism-Windows-x64.zip` to the presentation computer and extract it. In the extracted `Prism` folder, copy `.env.example` to `.env`, then set `SUPABASE_URL` and `SUPABASE_KEY`. `TMDB_API_KEY` is optional if you will not demonstrate Movies & TV. Jamendo uses its public Client ID by default.
+
+The ZIP deliberately excludes `.env`. Configure the extracted copy on the presentation computer instead of sharing credentials in the archive. Use only a Supabase publishable/legacy anon key protected by the project's row-level security; never distribute a `service_role` key. The computer needs internet access for Supabase, Jamendo, and TMDB. Local files and Snake work without those catalog services.
+
 ## Data and credentials
 
 - `.env` contains local Supabase settings and is excluded from Git.

@@ -2,11 +2,17 @@
 """Load local Prism configuration from environment variables or .env."""
 
 import os
+import sys
 from pathlib import Path
 
 from dotenv import load_dotenv
 
-load_dotenv(Path(__file__).with_name(".env"))
+if getattr(sys, "frozen", False):
+    config_directory = Path(sys.executable).resolve().parent
+else:
+    config_directory = Path(__file__).resolve().parent
+
+load_dotenv(config_directory / ".env")
 
 SUPABASE_URL = os.getenv("SUPABASE_URL", "").strip()
 SUPABASE_KEY = os.getenv("SUPABASE_KEY", "").strip()
@@ -25,5 +31,6 @@ missing_settings = [
 if missing_settings:
     missing = ", ".join(missing_settings)
     raise RuntimeError(
-        f"Missing {missing}. Copy .env.example to .env and fill in your Supabase project values."
+        f"Missing {missing}. Copy .env.example to .env beside Prism and fill in "
+        "your Supabase project values."
     )

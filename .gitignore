@@ -23,3 +23,4 @@ Desktop.ini
 build/
 dist/
 *.spec
+build_windows.ps1
