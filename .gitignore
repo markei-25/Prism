@@ -1,0 +1,25 @@
+# Local configuration and account data
+.env
+*.sqlite
+*.sqlite3
+*.db
+
+# Python environments and generated files
+venv/
+.venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Editors and operating systems
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Packaging output
+build/
+dist/
+*.spec
