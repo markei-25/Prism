@@ -41,7 +41,9 @@ The Snake game adapts PyBox gameplay under its MIT license. See [THIRD_PARTY_NOT
 
    Edit `.env` and set `SUPABASE_URL` and `SUPABASE_KEY` to the project's Supabase URL and publishable key. Never put a Supabase `service_role` key in this desktop client or commit `.env`.
 
-   In the Supabase SQL Editor, run [`supabase/migrations/202606080001_music_playlists.sql`](./supabase/migrations/202606080001_music_playlists.sql) once. It creates account-owned playlists and Jamendo playlist entries protected by row-level security. If an existing `public.playlists` table uses non-UUID `id` or `user_id` columns, the migration stops with an explicit error; do not drop that table, since it may contain data. Local file entries are stored only on this computer under `%LOCALAPPDATA%\Prism\playlist_items.sqlite3`; their paths are not uploaded.
+   In the Supabase SQL Editor, run [`supabase/migrations/202606080001_music_playlists.sql`](./supabase/migrations/202606080001_music_playlists.sql) once. It creates account-owned playlists and Jamendo playlist entries protected by row-level security. If an existing `public.playlists` table uses non-UUID `id` or `user_id` columns, the migration stops with an explicit error; do not drop that table, since it may contain data.
+
+   If you use the **Supabase library** or **Liked Songs** destination, also run [`supabase/migrations/202611060001_legacy_music_library.sql`](./supabase/migrations/202611060001_legacy_music_library.sql). It creates the legacy `songs` and account-owned `liked_songs` tables with row-level security. Add your song rows to `public.songs` in Supabase; the Jamendo and Local files sources do not require these legacy tables. Local playlist entries are stored only on this computer under `%LOCALAPPDATA%\Prism\playlist_items.sqlite3`; their paths are not uploaded.
 
    To enable the Movies & TV catalog, set `TMDB_API_KEY` in the same local `.env` file using your own TMDB API key. Keep it out of Git as well.
 

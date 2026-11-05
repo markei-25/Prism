@@ -21,6 +21,7 @@ from PyQt6.QtWidgets import (
     QLabel,
     QLineEdit,
     QPushButton,
+    QScrollArea,
     QTableWidget,
     QTableWidgetItem,
     QTextBrowser,
@@ -301,7 +302,21 @@ class MovieCatalogView(QWidget):
         details_panel.setStyleSheet(
             "#details_panel { background-color: #141419; border: 1px solid #2E2E3E; border-radius: 7px; }"
         )
-        details_layout = QVBoxLayout(details_panel)
+        details_panel_layout = QVBoxLayout(details_panel)
+        details_panel_layout.setContentsMargins(0, 0, 0, 0)
+        details_panel_layout.setSpacing(0)
+
+        details_scroll = QScrollArea()
+        details_scroll.setObjectName("details_scroll")
+        details_scroll.setWidgetResizable(True)
+        details_scroll.setFrameShape(QFrame.Shape.NoFrame)
+        details_scroll.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+        )
+        details_content = QWidget()
+        details_content.setObjectName("details_content")
+        details_content.setStyleSheet("background-color: #141419;")
+        details_layout = QVBoxLayout(details_content)
         details_layout.setContentsMargins(14, 14, 14, 14)
         details_layout.setSpacing(9)
 
@@ -340,6 +355,8 @@ class MovieCatalogView(QWidget):
         self.wikipedia_button.setEnabled(False)
         self.wikipedia_button.clicked.connect(self._open_wikipedia_search)
         details_layout.addWidget(self.wikipedia_button)
+        details_scroll.setWidget(details_content)
+        details_panel_layout.addWidget(details_scroll)
         content.addWidget(details_panel, stretch=2)
         layout.addLayout(content, stretch=1)
 

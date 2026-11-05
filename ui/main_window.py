@@ -13,6 +13,7 @@ from PyQt6.QtCore import (
     QTimer,
     Qt,
     pyqtSignal,
+    pyqtSlot,
 )
 from PyQt6.QtWidgets import (
     QComboBox,
@@ -63,7 +64,7 @@ LOGGER = logging.getLogger(__name__)
 
 class MusicLibraryLoader(QThread):
     loaded = pyqtSignal(int, list)
-    failed = pyqtSignal(int)
+    failed = pyqtSignal(int, str)
 
     def __init__(self, request_id: int, user_id: str, liked_only: bool):
         super().__init__()
@@ -78,9 +79,21 @@ class MusicLibraryLoader(QThread):
             else:
                 songs = db.fetch_all_songs()
             self.loaded.emit(self.request_id, songs)
-        except Exception:
+        except Exception as error:
             LOGGER.exception("Could not load the Prism music library")
-            self.failed.emit(self.request_id)
+            if getattr(error, "code", None) == "PGRST205":
+                message = (
+                    "The Supabase music tables are missing. Run "
+                    "supabase/migrations/202611060001_legacy_music_library.sql "
+                    "in the Supabase SQL Editor, then add tracks to the songs table. "
+                    "Jamendo and Local files work without these tables."
+                )
+            else:
+                message = (
+                    "Couldn't load the Supabase music library. Check your connection "
+                    f"and permissions, then try again. Details: {error}"
+                )
+            self.failed.emit(self.request_id, message)
 
 
 class MainWindow(QMainWindow):
@@ -97,6 +110,7 @@ class MainWindow(QMainWindow):
         self.music_loaded = False
         self.showing_liked_songs = False
         self.music_loader: MusicLibraryLoader | None = None
+        self._background_workers: dict[int, QThread] = {}
         self.load_request_id = 0
         self.jamendo_worker: JamendoSearchWorker | None = None
         self.local_scan_worker: LocalFolderScanWorker | None = None
@@ -502,6 +516,35 @@ class MainWindow(QMainWindow):
         self._page_animation = animation
         animation.start()
 
+    def _retain_background_worker(self, worker: QThread):
+        worker_id = id(worker)
+        self._background_workers[worker_id] = worker
+        worker.setParent(self)
+        worker.finished.connect(
+            self._release_background_worker,
+            Qt.ConnectionType.QueuedConnection,
+        )
+
+    @pyqtSlot()
+    def _release_background_worker(self):
+        worker = self.sender()
+        if not isinstance(worker, QThread):
+            return
+        worker_id = id(worker)
+
+        QTimer.singleShot(
+            0,
+            lambda retained_id=worker_id: self._dispose_background_worker(
+                retained_id
+            ),
+        )
+
+    def _dispose_background_worker(self, worker_id: int):
+        worker = self._background_workers.pop(worker_id, None)
+        if worker is not None:
+            worker.wait()
+            worker.deleteLater()
+
     def _update_music_source_controls(self):
         source = self.source_selector.currentData()
         is_jamendo = source == "jamendo"
@@ -577,7 +620,7 @@ class MainWindow(QMainWindow):
         )
         self.jamendo_worker.loaded.connect(self._handle_jamendo_loaded)
         self.jamendo_worker.failed.connect(self._handle_jamendo_error)
-        self.jamendo_worker.finished.connect(self.jamendo_worker.deleteLater)
+        self._retain_background_worker(self.jamendo_worker)
         self.jamendo_worker.start()
 
     def _handle_jamendo_loaded(self, request_id: int, tracks: list[dict]):
@@ -614,7 +657,7 @@ class MainWindow(QMainWindow):
         self.local_scan_worker = LocalFolderScanWorker(request_id, folder)
         self.local_scan_worker.loaded.connect(self._handle_local_folder_loaded)
         self.local_scan_worker.failed.connect(self._handle_local_folder_error)
-        self.local_scan_worker.finished.connect(self.local_scan_worker.deleteLater)
+        self._retain_background_worker(self.local_scan_worker)
         self.local_scan_worker.start()
 
     def _handle_local_folder_loaded(self, request_id: int, tracks: list[dict]):
@@ -652,7 +695,7 @@ class MainWindow(QMainWindow):
         self.music_loader = MusicLibraryLoader(self.load_request_id, self.user_id, liked_only)
         self.music_loader.loaded.connect(self._handle_library_loaded)
         self.music_loader.failed.connect(self._handle_library_error)
-        self.music_loader.finished.connect(self.music_loader.deleteLater)
+        self._retain_background_worker(self.music_loader)
         self.music_loader.start()
 
     def _handle_library_loaded(self, request_id: int, songs: list[dict]):
@@ -680,14 +723,11 @@ class MainWindow(QMainWindow):
             return
         self.filter_songs(self.search_bar.text())
 
-    def _handle_library_error(self, request_id: int):
+    def _handle_library_error(self, request_id: int, message: str):
         if request_id != self.load_request_id:
             return
         self.music_loader = None
-        self._set_music_state(
-            "Couldn't load the music library. Check your connection, then try again.",
-            is_error=True,
-        )
+        self._set_music_state(message, is_error=True)
     def _set_music_state(
         self,
         message: str,
@@ -807,7 +847,7 @@ class MainWindow(QMainWindow):
         self.audio_download_workers[request_id] = worker
         worker.loaded.connect(self._handle_audio_loaded)
         worker.failed.connect(self._handle_audio_error)
-        worker.finished.connect(worker.deleteLater)
+        self._retain_background_worker(worker)
         worker.start()
 
     def _handle_audio_loaded(self, request_id: int, song: dict, audio_data: bytes):
@@ -886,6 +926,14 @@ class MainWindow(QMainWindow):
             if self.playback_queue.tracks:
                 index = max(0, self.playback_queue.current_index)
                 self._play_queue_item(index)
+                return
+            selected_row = self.song_table.currentRow()
+            if (
+                self.pages.currentIndex() == 1
+                and 0 <= selected_row < len(self.displayed_songs)
+            ):
+                self.playback_queue.replace(self.displayed_songs, selected_row)
+                self._play_queue_item(selected_row)
                 return
             self.handle_navigation("music")
             return
@@ -1186,7 +1234,7 @@ class MainWindow(QMainWindow):
                 request_id, None
             )
         )
-        worker.finished.connect(worker.deleteLater)
+        self._retain_background_worker(worker)
         worker.start()
 
     def _request_playlists(self):
@@ -1321,9 +1369,7 @@ class MainWindow(QMainWindow):
     def closeEvent(self, event):
         self.playback_timer.stop()
         workers = [
-            self.music_loader,
-            self.jamendo_worker,
-            self.local_scan_worker,
+            *self._background_workers.values(),
             *self.audio_download_workers.values(),
             *self.database_workers.values(),
         ]

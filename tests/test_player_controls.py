@@ -97,6 +97,36 @@ class PlayerControlsTests(unittest.TestCase):
         self.assertFalse(dialog.remove_button.isEnabled())
         self.assertFalse(dialog.clear_button.isEnabled())
 
+    def test_play_button_starts_selected_library_track(self):
+        track = {
+            "jamendo_id": "jam-1",
+            "title": "Selected track",
+            "artist": "Artist",
+            "source": "jamendo",
+            "audio_url": "https://example.test/track.mp3",
+        }
+        player = Mock()
+        player.current_song = None
+
+        with (
+            patch("ui.main_window.AudioPlayer", return_value=player),
+            patch.object(MainWindow, "_request_playlists", lambda self: None),
+        ):
+            window = MainWindow("user-1")
+            window.pages.setCurrentIndex(1)
+            window.displayed_songs = [track]
+            window.song_table.setRowCount(1)
+            window.song_table.setItem(0, 0, QTableWidgetItem("Selected track"))
+            window.song_table.selectRow(0)
+            window._play_queue_item = Mock()
+
+            window.handle_play_toggle()
+
+            self.assertEqual(window.playback_queue.tracks, [track])
+            self.assertEqual(window.playback_queue.current_index, 0)
+            window._play_queue_item.assert_called_once_with(0)
+            window.close()
+
     def test_sidebar_playlist_items_emit_account_playlist_id(self):
         sidebar = Sidebar()
         selected = []
