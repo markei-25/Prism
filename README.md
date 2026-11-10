@@ -6,9 +6,9 @@ Prism is a Python desktop media hub for music and audio, movies and TV, and arca
 
 - Music and audio: Jamendo search and streaming, recursive playback from a selected local folder, and the existing Supabase library available as a separate legacy source.
 - Movies and TV: TMDB title catalogue and embedded local video playback.
-- Arcade: Snake is playable inside Prism; more games can be added later.
+- Arcade: Snake and Tetris are playable inside Prism; the arcade is now a two-game picker.
 
-The Snake game adapts PyBox gameplay under its MIT license. See [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md) for attribution and license terms.
+The Snake game adapts PyBox gameplay under its MIT license. See [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md) for attribution and license terms. Tetris is a built-in Prism arcade game.
 
 ## Requirements
 
@@ -82,7 +82,7 @@ The ZIP deliberately excludes `.env`. Configure the extracted copy on the presen
 - Supabase Auth provides account identity and sessions. SQLite stores a salted PBKDF2 password hash and its metadata locally; the database is created under `%LOCALAPPDATA%\Prism\users.sqlite3`.
 - Do not commit `.env`, SQLite databases, real user data, or credentials.
 - The Movies & TV catalog uses TMDB metadata. This app is not endorsed or certified by TMDB; see the in-app Credits for attribution.
-- Snake uses arrow keys or W/A/S/D to steer, Space or Escape to pause, a Play overlay to start or replay, and icon controls above the board to pause or restart.
+- Snake uses arrow keys or W/A/S/D to steer, Space or Escape to pause, a Play overlay to start or replay, and icon controls above the board to pause or restart. Tetris uses the same compact arcade controls with arrow keys and W/A/S/D for movement, rotation, and soft drops.
 - Jamendo catalog search and genre browsing use its public API. Select a Jamendo result and double-click to play it; track pages and license links are shown in Prism. Downloads are not offered.
 - Select **Local files** in Music & Audio and choose a folder to scan recursively. Supported extensions are MP3, OGG, OGA, WAV, and FLAC.
 - The player queue follows the active results or playlist when a track is started. Use the queue panel to play, remove, or clear upcoming tracks; shuffle and repeat-off/all/one controls are available in the player bar. Timeline seeking depends on the active format supporting seeking.
