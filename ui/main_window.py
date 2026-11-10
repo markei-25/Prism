@@ -7,8 +7,6 @@ from pathlib import Path
 
 from PyQt6.QtCore import (
     QEvent,
-    QEasingCurve,
-    QPropertyAnimation,
     QThread,
     QTimer,
     Qt,
@@ -18,7 +16,6 @@ from PyQt6.QtCore import (
 from PyQt6.QtWidgets import (
     QComboBox,
     QFileDialog,
-    QGraphicsOpacityEffect,
     QHBoxLayout,
     QHeaderView,
     QLabel,
@@ -33,7 +30,7 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-from PyQt6.QtGui import QContextMenuEvent
+from PyQt6.QtGui import QColor, QContextMenuEvent, QPalette
 
 from player import AudioPlayer
 from config import JAMENDO_CLIENT_ID
@@ -304,6 +301,13 @@ class MainWindow(QMainWindow):
         self.pages.addWidget(ViewView())
         self.arcade_view = ArcadeView()
         self.pages.addWidget(self.arcade_view)
+        for page_index in range(self.pages.count()):
+            page = self.pages.widget(page_index)
+            page.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
+            page.setAutoFillBackground(True)
+            page_palette = page.palette()
+            page_palette.setColor(QPalette.ColorRole.Window, QColor("#0F0F12"))
+            page.setPalette(page_palette)
         body.addWidget(self.pages, stretch=1)
         root_layout.addLayout(body, stretch=1)
 
@@ -355,9 +359,9 @@ class MainWindow(QMainWindow):
         movies_button.clicked.connect(lambda: self.handle_navigation("movies"))
         layout.addWidget(movies_button)
 
-        arcade_button = QPushButton("Arcade\nPlay Snake inside Prism")
+        arcade_button = QPushButton("Arcade\nPlay Snake or Tetris inside Prism")
         arcade_button.setObjectName("route_media")
-        arcade_button.setAccessibleName("Open Arcade and play Snake")
+        arcade_button.setAccessibleName("Open Arcade and play Snake or Tetris")
         arcade_button.clicked.connect(lambda: self.handle_navigation("arcade"))
         layout.addWidget(arcade_button)
 
@@ -500,21 +504,12 @@ class MainWindow(QMainWindow):
         if self.pages.currentIndex() == index:
             return
 
-        if hasattr(self, "_page_animation"):
-            self._page_animation.stop()
-        self.pages.setCurrentIndex(index)
-        page = self.pages.widget(index)
-        effect = QGraphicsOpacityEffect(page)
-        page.setGraphicsEffect(effect)
-        effect.setOpacity(0.72)
+        for page_index in range(self.pages.count()):
+            page = self.pages.widget(page_index)
+            if page.graphicsEffect() is not None:
+                page.setGraphicsEffect(None)
 
-        animation = QPropertyAnimation(effect, b"opacity", self)
-        animation.setDuration(160)
-        animation.setStartValue(0.72)
-        animation.setEndValue(1.0)
-        animation.setEasingCurve(QEasingCurve.Type.OutCubic)
-        self._page_animation = animation
-        animation.start()
+        self.pages.setCurrentIndex(index)
 
     def _retain_background_worker(self, worker: QThread):
         worker_id = id(worker)
