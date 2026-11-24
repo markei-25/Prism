@@ -18,6 +18,7 @@ from PyQt6.QtWidgets import (
 )
 
 from config import TMDB_API_KEY
+from ui.archive_catalog import ArchiveCatalogView
 from ui.movie_catalog import MovieCatalogView
 
 
@@ -151,7 +152,11 @@ class ViewView(QWidget):
         self.tabs = QTabWidget()
         self.catalog_view = MovieCatalogView(TMDB_API_KEY)
         self.tabs.addTab(self.catalog_view, "Catalogue")
-        self.tabs.addTab(self._build_local_player_page(), "Play a file")
+        self.archive_view = ArchiveCatalogView()
+        self.archive_view.play_requested.connect(self._play_archive_video)
+        self.tabs.addTab(self.archive_view, "Internet Archive")
+        self.player_page = self._build_local_player_page()
+        self.tabs.addTab(self.player_page, "Video player")
         layout.addWidget(self.tabs, stretch=1)
 
     def _build_local_player_page(self) -> QWidget:
@@ -160,7 +165,9 @@ class ViewView(QWidget):
         layout.setContentsMargins(12, 12, 12, 12)
         layout.setSpacing(12)
 
-        intro = QLabel("Open a video stored on this device to watch it in Prism.")
+        intro = QLabel(
+            "Open a local video or choose an Internet Archive result to stream it here."
+        )
         intro.setObjectName("body_copy")
         intro.setWordWrap(True)
         layout.addWidget(intro)
@@ -174,7 +181,9 @@ class ViewView(QWidget):
         self.video_widget.setAccessibleName("Video playback")
         layout.addWidget(self.video_widget, stretch=1)
 
-        self.video_status = QLabel("No video selected. Choose a file to begin.")
+        self.video_status = QLabel(
+            "No video selected. Open a local file or choose an Archive result."
+        )
         self.video_status.setObjectName("video_status")
         self.video_status.setWordWrap(True)
         self.video_status.setAccessibleName("Video status")
@@ -183,7 +192,7 @@ class ViewView(QWidget):
         transport = QHBoxLayout()
         transport.setSpacing(10)
 
-        self.open_button = QPushButton("Open video")
+        self.open_button = QPushButton("Open local video")
         self.open_button.setObjectName("open_video")
         self.open_button.clicked.connect(self.open_video_dialog)
         transport.addWidget(self.open_button)
@@ -262,16 +271,39 @@ class ViewView(QWidget):
             self._show_error("That video file could not be found.")
             return
 
-        self.media_player.stop()
-        self.media_player.setSource(QUrl.fromLocalFile(str(path.resolve())))
         self.file_name_label.setText(path.name)
+        self._prepare_video_source(
+            QUrl.fromLocalFile(str(path.resolve())),
+            "Loading local video…",
+            autoplay=False,
+        )
+
+    def _play_archive_video(self, stream_url: str, title: str):
+        url = QUrl(stream_url)
+        if (
+            url.scheme().casefold() != "https"
+            or url.host().casefold() != "archive.org"
+            or not url.path().startswith("/download/")
+        ):
+            self._show_error("Prism rejected an unexpected Internet Archive video URL.")
+            return
+
+        self.file_name_label.setText(title)
+        self._prepare_video_source(url, "Connecting to Internet Archive…", autoplay=True)
+        self.tabs.setCurrentWidget(self.player_page)
+
+    def _prepare_video_source(self, source: QUrl, status: str, autoplay: bool):
+        self.media_player.stop()
+        self.media_player.setSource(source)
         self.video_status.setStyleSheet("color: #B7B7C7;")
-        self.video_status.setText("Loading video…")
+        self.video_status.setText(status)
         self.play_button.setEnabled(False)
         self.position_slider.setEnabled(False)
         self.position_slider.setRange(0, 0)
         self.position_label.setText("0:00")
         self.duration_label.setText("0:00")
+        if autoplay:
+            self.media_player.play()
 
     def toggle_playback(self):
         state = self.media_player.playbackState()

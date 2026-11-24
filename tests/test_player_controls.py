@@ -12,6 +12,7 @@ from ui.main_window import MainWindow
 from ui.player_bar import PlayerBar
 from ui.queue_dialog import QueueDialog
 from ui.sidebar import Sidebar
+from ui.view_view import ViewView
 
 
 class PlayerControlsTests(unittest.TestCase):
@@ -210,6 +211,35 @@ class PlayerControlsTests(unittest.TestCase):
                 track,
             )
             window.close()
+
+    def test_movies_view_keeps_tmdb_and_local_player_with_archive_tab(self):
+        view = ViewView()
+
+        self.assertEqual(
+            [view.tabs.tabText(index) for index in range(view.tabs.count())],
+            ["Catalogue", "Internet Archive", "Video player"],
+        )
+        self.assertEqual(view.open_button.text(), "Open local video")
+        view.close()
+
+    def test_archive_player_accepts_only_archive_download_urls(self):
+        view = ViewView()
+        view._prepare_video_source = Mock()
+
+        view._play_archive_video(
+            "https://archive.org/download/item/video.mp4",
+            "Film",
+        )
+
+        view._prepare_video_source.assert_called_once()
+        self.assertEqual(view.tabs.currentWidget(), view.player_page)
+
+        view._prepare_video_source.reset_mock()
+        view._play_archive_video("https://example.test/download/item/video.mp4", "Film")
+
+        view._prepare_video_source.assert_not_called()
+        self.assertIn("rejected", view.video_status.text())
+        view.close()
 
 
 if __name__ == "__main__":

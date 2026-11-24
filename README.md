@@ -5,7 +5,8 @@ Prism is a Python desktop media hub for music and audio, movies and TV, and arca
 ## Current status
 
 - Music and audio: Jamendo search and streaming, recursive playback from a selected local folder, and the existing Supabase library available as a separate legacy source.
-- Movies and TV: TMDB title catalogue and embedded local video playback.
+- Movies and TV: TMDB title catalogue, Internet Archive feature-film search and
+  playback for supported listed licenses, and embedded local video playback.
 - Arcade: Snake is playable inside Prism; more games can be added later.
 
 The Snake game adapts PyBox gameplay under its MIT license. See [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md) for attribution and license terms.
@@ -43,7 +44,7 @@ The Snake game adapts PyBox gameplay under its MIT license. See [THIRD_PARTY_NOT
 
    In the Supabase SQL Editor, run [`supabase/migrations/202606080001_music_playlists.sql`](./supabase/migrations/202606080001_music_playlists.sql) once. It creates account-owned playlists and Jamendo playlist entries protected by row-level security. If an existing `public.playlists` table uses non-UUID `id` or `user_id` columns, the migration stops with an explicit error; do not drop that table, since it may contain data. Local file entries are stored only on this computer under `%LOCALAPPDATA%\Prism\playlist_items.sqlite3`; their paths are not uploaded.
 
-   To enable the Movies & TV catalog, set `TMDB_API_KEY` in the same local `.env` file using your own TMDB API key. Keep it out of Git as well.
+   To enable TMDB title search in Movies & TV, set `TMDB_API_KEY` in the same local `.env` file using your own TMDB API key. Archive search and local video playback do not require it. Keep the key out of Git.
 
    Music & Audio uses the public Jamendo Client ID in `.env.example` by default. It can be overridden with `JAMENDO_CLIENT_ID`. Do not add a Jamendo client secret to this desktop app.
 
@@ -70,7 +71,7 @@ Build on a Windows computer using the same architecture as the presentation comp
    .\build_windows.ps1
    ```
 
-3. Copy `dist\Prism-Windows-x64.zip` to the presentation computer and extract it. In the extracted `Prism` folder, copy `.env.example` to `.env`, then set `SUPABASE_URL` and `SUPABASE_KEY`. `TMDB_API_KEY` is optional if you will not demonstrate Movies & TV. Jamendo uses its public Client ID by default.
+3. Copy `dist\Prism-Windows-x64.zip` to the presentation computer and extract it. In the extracted `Prism` folder, copy `.env.example` to `.env`, then set `SUPABASE_URL` and `SUPABASE_KEY`. `TMDB_API_KEY` is optional unless you plan to demonstrate TMDB title search. Jamendo uses its public Client ID by default.
 
 The ZIP deliberately excludes `.env`. Configure the extracted copy on the presentation computer instead of sharing credentials in the archive. Use only a Supabase publishable/legacy anon key protected by the project's row-level security; never distribute a `service_role` key. The computer needs internet access for Supabase, Jamendo, and TMDB. Local files and Snake work without those catalog services.
 
@@ -80,6 +81,7 @@ The ZIP deliberately excludes `.env`. Configure the extracted copy on the presen
 - Supabase Auth provides account identity and sessions. SQLite stores a salted PBKDF2 password hash and its metadata locally; the database is created under `%LOCALAPPDATA%\Prism\users.sqlite3`.
 - Do not commit `.env`, SQLite databases, real user data, or credentials.
 - The Movies & TV catalog uses TMDB metadata. This app is not endorsed or certified by TMDB; see the in-app Credits for attribution.
+- Internet Archive search is limited to its `feature_films` collection and items with a listed license. Prism enables in-app playback only for a supported public-domain or Creative Commons license and an MP4 stream. License statements come from item metadata supplied by uploaders; review the linked Archive record and license before use. Video is streamed from Internet Archive.
 - Snake uses arrow keys or W/A/S/D to steer, Space or Escape to pause, a Play overlay to start or replay, and icon controls above the board to pause or restart.
 - Jamendo catalog search and genre browsing use its public API. Select a Jamendo result and double-click to play it; track pages and license links are shown in Prism. Downloads are not offered.
 - Select **Local files** in Music & Audio and choose a folder to scan recursively. Supported extensions are MP3, OGG, OGA, WAV, and FLAC.
