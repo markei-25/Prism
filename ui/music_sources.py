@@ -165,7 +165,7 @@ def search_jamendo_tracks(client_id: str, query: str = "", genre: str = "") -> l
         raw_tracks = _request_jamendo(
             "tracks",
             client_id,
-            order="popularity_total_desc",
+            order="popularity_total",
         )
 
     tracks = [_normalize_track(track) for track in raw_tracks]
