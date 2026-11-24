@@ -10,7 +10,7 @@
 The project satisfies requirement **Option 3A: Media and Entertainment**, covering three unified media components inside a single desktop application without external application redirects:
 
 1. 🎵 **3A.2 Music & Audio:** Jamendo catalog search and streaming, recursive playback from a selected local folder, and the existing Supabase library retained as a separate source. Playback uses `pygame-ce`. *(Status: Jamendo search, genre browsing, local-file playback, queue, shuffle/repeat, timeline, and account-linked playlists implemented.)*
-2. 🎬 **3A.1 Movies & TV Shows:** TMDB-backed title catalogue plus local embedded video playback powered by PyQt6 (`QMediaPlayer` & `QVideoWidget`). *(Status: Catalogue UI and local playback implemented; test with the configured API key and a local video file.)*
+2. 🎬 **3A.1 Movies & TV Shows:** TMDB-backed title catalogue, Internet Archive feature-film search and MP4 playback for supported listed licenses, plus local embedded video playback powered by PyQt6 (`QMediaPlayer` & `QVideoWidget`). *(Status: TMDB catalogue, Archive search/details/streaming, and local playback implemented. Archive license statements come from item metadata supplied by uploaders and should be checked on the item record.)*
 3. 🎮 **3A.3 Games & Arcade:** Interactive mini-games integrated natively inside a PyQt layout frame. *(Status: Snake playable in the Arcade view, adapted from PyBox under MIT; more games planned.)*
 
 ---
@@ -109,7 +109,7 @@ When continuing development in VS Code, follow this implementation order:
 3. **Build Video Player (`ui/video_view.py`):**
    - Implement `QMediaPlayer` and `QVideoWidget` from `PyQt6.QtMultimedia` & `PyQt6.QtMultimediaWidgets`.
    - Add playback controls (play/pause, timeline slider, volume).
-   - Current first pass: `ui/view_view.py` hosts a TMDB movie/TV catalogue and a local video player. Internet playback remains a separate future feature.
+   - Current first pass: `ui/view_view.py` hosts a TMDB movie/TV catalogue, Internet Archive feature-film search and supported MP4 streaming, and a local video player. Broader Archive curation, filters, lists, and channel schedules remain future work.
 
 4. **Expand the In-App Game Module (`ui/arcade_view.py`):**
    - Add more embedded games to the Arcade picker after Snake.

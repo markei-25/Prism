@@ -34,3 +34,16 @@ The MIT License applies to the PyBox portions adapted here:
 > LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 > OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 > SOFTWARE.
+
+## Internet Archive movie-browser reference
+
+The Internet Archive browsing feature was developed with this project as a
+functional reference:
+
+- Repository: <https://github.com/amponce/archive-movie-browser>
+- Copyright (c) 2025 Orphaned Films contributors
+- License: MIT
+
+Prism's implementation is native Qt and uses its own Internet Archive API
+client. It does not include code, curated data, the Orphaned Films name,
+branding, or website assets from the reference project.
